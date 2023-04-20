@@ -187,6 +187,16 @@ client = pymongo.MongoClient(MONGO)
 db = client["awtproj"]
 collection = db["coordinates"]
 
+# API to get the `coordinates` document
+@app.route('/api/get_coordinates', methods=['GET'])
+def get_coordinates():
+    # Find the `coordinates` document and convert it to a JSON object
+    result = collection.find_one()
+    coordinates = {'lat': result['lat'], 'lng': result['lng']}
+    
+    # Return the `coordinates` document as a JSON response
+    return json.dumps(coordinates), 200
+
 # API to create the `coordinates` schema with a single document
 @app.route('/api/create_coordinates', methods=['POST'])
 def create_coordinates():
