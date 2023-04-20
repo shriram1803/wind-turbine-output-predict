@@ -158,7 +158,6 @@ def forecastAndPredict6days():
         apikey = str(data['apikey']);
         try:
            data= getForecastData(apikey, lat, lng)
-           print(data)
            data["wp"]=[]
            for i in range(len(data["time"])):
             result=predictForWindSpeedAndWindDirection(data["ws"][i], int(data["wd"][i]))
@@ -167,6 +166,52 @@ def forecastAndPredict6days():
         except Exception as e:
             print(e)
             return "error"
+        
+
+
+
+from flask_pymongo import pymongo
+import json
+
+from dotenv import load_dotenv
+import os
+
+# load environment variables from .env file
+load_dotenv()
+
+# use environment variables
+MONGO = os.getenv('MONGO_URI')
+
+# Set up MongoDB connection
+client = pymongo.MongoClient(MONGO)
+db = client["awtproj"]
+collection = db["coordinates"]
+
+# API to create the `coordinates` schema with a single document
+@app.route('/api/create_coordinates', methods=['POST'])
+def create_coordinates():
+    # Create the `coordinates` schema with a single document
+    print("create_called")
+    result = collection.insert_one({'lat': "0", 'lng': "0"})
+    
+    # Return the ID of the inserted document as a JSON response
+    return json.dumps({'success': True, 'id': str(result.inserted_id)}), 201
+
+# API to update the `lat` and `lng` values of the single document
+@app.route('/api/update_coordinates', methods=['POST'])
+def update_coordinates():
+    # Get the request data as a JSON object
+    print("update_called")
+    data = request.get_json()
+    
+    # Update the `lat` and `lng` values of the single document
+    result = collection.update_one({}, {'$set': {'lat': data['lat'], 'lng': data['lng']}})
+    
+    # Return a success message as a JSON response
+    return json.dumps({'success': True}), 200
+
+
+
 
 
 
